@@ -1,4 +1,4 @@
-# remmifit
+# remmyfit
 
 A new Flutter project.
 
