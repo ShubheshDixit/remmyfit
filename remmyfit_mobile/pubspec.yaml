@@ -1,0 +1,43 @@
+name: remmifit
+description: A reminder and fitness app.
+
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  awesome_notifications: ^0.6.18+2
+  cloud_firestore: ^3.1.0
+  cupertino_icons: ^1.0.2
+  firebase_auth: ^3.2.0
+  firebase_core: ^1.10.0
+  firebase_storage: ^10.1.0
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^9.1.4
+  font_awesome_flutter: ^9.2.0
+  google_fonts: ^2.1.0
+  google_sign_in: ^5.2.1
+  simple_link_preview: ^1.0.2
+  url_launcher: ^6.0.13
+  uuid: ^3.0.5
+  webview_flutter: ^2.3.1
+
+dev_dependencies:
+  flutter_lints: ^1.0.0
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+# The following section is specific to Flutter.
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/
+    - assets/health/

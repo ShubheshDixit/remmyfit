@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "562998651544",
+    "project_id": "remmyfit",
+    "storage_bucket": "remmyfit.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:562998651544:android:2eff3d4f9ac9278b957eed",
+        "android_client_info": {
+          "package_name": "com.atnosoft.remmyfit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "562998651544-88lsa7scauomdkier8hs9vo92qgo4t65.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.atnosoft.remmyfit",
+            "certificate_hash": "00d3a655c67a5f77f2e0c2ddac6be5608db6b151"
+          }
+        },
+        {
+          "client_id": "562998651544-0b73tk70aaev823am149t72132qnq17u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRkP6fryI7t59Spf2E3azxM2qRklHELag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "562998651544-0b73tk70aaev823am149t72132qnq17u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
