@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,6 +15,7 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
+  StreamSubscription<User?>? sub;
   Future<UserCredential> signInWithGoogle() async {
     setState(() {
       isProcessing = true;
@@ -36,6 +39,30 @@ class _AuthPageState extends State<AuthPage> {
 
     // Once signed in, return the UserCredential
     return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    sub = FirebaseAuth.instance.authStateChanges().listen((event) {
+      if (mounted) {
+        if (event != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => const Home(),
+            ),
+          );
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (sub != null) {
+      sub?.cancel();
+    }
+    super.dispose();
   }
 
   bool isProcessing = false;

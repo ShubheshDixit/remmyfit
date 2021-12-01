@@ -1,8 +1,11 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:remmifit/models/pills_reminder.dart';
 import 'package:remmifit/services/db_service.dart';
+import 'package:awesome_notifications/src/utils/date_utils.dart' as Utils;
+import 'package:uuid/uuid.dart';
 
 class AddPillReminder extends StatefulWidget {
   const AddPillReminder({Key? key}) : super(key: key);
@@ -15,7 +18,7 @@ class _AddPillReminderState extends State<AddPillReminder> {
   PillTakeTime pillTakeTime = PillTakeTime.withFood;
   String? pillName;
   int? pillAmount, days;
-  List<TimeOfDay> notificationsTime = [];
+  List<NotificationTime> notificationsTime = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,9 +85,14 @@ class _AddPillReminderState extends State<AddPillReminder> {
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: const Center(
+                  child: Center(
                     child: TextField(
-                      decoration: InputDecoration(
+                      onChanged: (value) {
+                        setState(() {
+                          pillName = value;
+                        });
+                      },
+                      decoration: const InputDecoration(
                         prefixIcon: Icon(FontAwesomeIcons.prescription),
                         hintText: 'Enter Pill Name',
                         // label: Text('Pill Name'),
@@ -113,10 +121,15 @@ class _AddPillReminderState extends State<AddPillReminder> {
                           borderRadius: BorderRadius.circular(5.0),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: const Center(
+                        child: Center(
                           child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                pillAmount = int.tryParse(value);
+                              });
+                            },
                             keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               prefixIcon: Icon(FontAwesomeIcons.pills),
                               suffix: Padding(
                                 padding: EdgeInsets.only(right: 8.0),
@@ -142,10 +155,15 @@ class _AddPillReminderState extends State<AddPillReminder> {
                           borderRadius: BorderRadius.circular(5.0),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: const Center(
+                        child: Center(
                           child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                days = int.tryParse(value);
+                              });
+                            },
                             keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               prefixIcon: Icon(FontAwesomeIcons.calendarDay),
                               hintText: 'Days',
                               suffix: Padding(
@@ -662,7 +680,7 @@ class _AddPillReminderState extends State<AddPillReminder> {
                                     child: Icon(FontAwesomeIcons.clock),
                                   ),
                                   Text(
-                                    notificationsTime[index].format(context),
+                                    notificationsTime[index].toString(),
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -700,7 +718,10 @@ class _AddPillReminderState extends State<AddPillReminder> {
                       );
                       if (time != null) {
                         setState(() {
-                          notificationsTime.add(time);
+                          notificationsTime.add(
+                            NotificationTime(
+                                time.hour, time.minute, time.period),
+                          );
                         });
                       }
                     },
@@ -727,14 +748,99 @@ class _AddPillReminderState extends State<AddPillReminder> {
                   width: MediaQuery.of(context).size.width,
                   height: 60,
                   child: ElevatedButton.icon(
-                    onPressed: () async {
-                      DatabaseService.instance.addPillReminder(
-                          pillName ?? '',
-                          pillAmount ?? 0,
-                          days ?? 0,
-                          pillTakeTime,
-                          notificationsTime);
-                    },
+                    onPressed: !(pillName != null &&
+                            pillAmount != null &&
+                            days != null)
+                        ? null
+                        : () async {
+                            String id = const Uuid()
+                                .v4()
+                                .replaceAll('-', '')
+                                .substring(10);
+                            List<int> notificationsId = [];
+                            for (int i = 0; i < notificationsTime.length; i++) {
+                              int notifId =
+                                  (DateTime.now().millisecondsSinceEpoch /
+                                              1000000 +
+                                          i)
+                                      .toInt();
+                              notificationsId.add(notifId);
+                            }
+
+                            if (pillName != null &&
+                                pillAmount != null &&
+                                days != null) {
+                              List<Map> notifications = [];
+
+                              notificationsTime.forEach((element) {
+                                notifications.add(element.toJson());
+                              });
+                              await DatabaseService.instance.addPillReminder(
+                                id,
+                                pillName ?? '',
+                                pillAmount ?? 0,
+                                days ?? 0,
+                                pillTakeTime,
+                                notifications,
+                                notificationsId,
+                              );
+                            }
+                            if (notificationsTime.isNotEmpty) {
+                              for (int i = 0;
+                                  i < notificationsTime.length;
+                                  i++) {
+                                DateTime scheduleTime = DateTime.now().add(
+                                  const Duration(seconds: 5),
+                                );
+                                String localTimeZone =
+                                    await AwesomeNotifications()
+                                        .getLocalTimeZoneIdentifier();
+
+                                await AwesomeNotifications().createNotification(
+                                  content: NotificationContent(
+                                    id: notificationsId[i],
+                                    channelKey: 'remmyfit_channel',
+                                    title: 'Time to take your pill.',
+                                    body: 'Your pill $pillName was schedule to be taken at ' +
+                                        (Utils.DateUtils.parseDateToString(
+                                                scheduleTime.toLocal()) ??
+                                            '?') +
+                                        ' $localTimeZone. Please take $pillAmount pills and get well soon.',
+                                    wakeUpScreen: true,
+                                    category: NotificationCategory.Reminder,
+                                    notificationLayout:
+                                        NotificationLayout.BigPicture,
+                                    bigPicture:
+                                        'asset://assets/images/health/Drawkit-Vector-Illustration-Medical-07.png',
+                                    payload: {'id': id},
+                                  ),
+                                  schedule: NotificationCalendar(
+                                    timeZone: localTimeZone,
+                                    hour: notificationsTime[i].hour,
+                                    minute: notificationsTime[i].minute,
+                                  ),
+                                );
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text(
+                                      'Pill Reminder Created Successfully!',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Done'),
+                                      )
+                                    ],
+                                  ),
+                                ).then(
+                                  (value) => Navigator.of(context).pop(),
+                                );
+                              }
+                            }
+                          },
                     icon: const Icon(
                       FontAwesomeIcons.save,
                       color: Colors.white,
@@ -759,5 +865,44 @@ class _AddPillReminderState extends State<AddPillReminder> {
         ),
       ),
     );
+  }
+}
+
+class NotificationTime {
+  final int hour, minute;
+  DayPeriod period;
+  NotificationTime(this.hour, this.minute, this.period);
+
+  Map toJson() {
+    return {
+      'hour': hour,
+      'minute': minute,
+      'period': _getPeriod(period),
+    };
+  }
+
+  factory NotificationTime.fromJSON(Map json) {
+    return NotificationTime(
+        json['hour'], json['minute'], _fromPeriod(json['period']));
+  }
+
+  static String _getPeriod(DayPeriod period) {
+    return period == DayPeriod.am ? 'AM' : 'PM';
+  }
+
+  static DayPeriod _fromPeriod(String period) {
+    return period == 'AM' ? DayPeriod.am : DayPeriod.pm;
+  }
+
+  String _getTowDigitNumbers(int number) {
+    return number >= 10 ? number.toString() : '0' + number.toString();
+  }
+
+  @override
+  String toString() {
+    return _getTowDigitNumbers(hour) +
+        ":" +
+        _getTowDigitNumbers(minute) +
+        _getPeriod(period);
   }
 }

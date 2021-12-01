@@ -17,7 +17,6 @@ dependencies:
   firebase_storage: ^10.1.0
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^9.1.4
   font_awesome_flutter: ^9.2.0
   google_fonts: ^2.1.0
   google_sign_in: ^5.2.1

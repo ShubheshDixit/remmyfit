@@ -3,16 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:remmifit/pages/auth_page.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  tz.initializeTimeZones();
   // tz.setLocalLocation(tz.getLocation('India/Delhi'));
   AwesomeNotifications().initialize(
     // set the icon to null if you want to use the default app icon
-    'resource://drawable/ic_launcher.png',
+    null,
     [
       NotificationChannel(
           channelGroupKey: 'remmyfit_group',
@@ -26,7 +24,7 @@ void main() async {
     channelGroups: [
       NotificationChannelGroup(
         channelGroupkey: 'remmyfit_group',
-        channelGroupName: 'RemmyFit',
+        channelGroupName: 'RemmyFitGroup',
       )
     ],
     debug: true,
